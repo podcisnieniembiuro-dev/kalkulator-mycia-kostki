@@ -3,154 +3,165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kalkulator mycia kostki</title>
+<title>Kalkulator wyceny - mycie kostki</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:20px}
-.box{max-width:720px;margin:auto;background:white;padding:28px;border-radius:22px;box-shadow:0 10px 30px #0002}
-h1{margin-top:0;color:#123}
-label{font-weight:bold;margin-top:16px;display:block}
-input,select{width:100%;padding:14px;margin-top:6px;border-radius:12px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
-input[type=range]{padding:0}
-.row{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center}
-.check{display:flex;gap:10px;align-items:center;margin-top:12px}
-.check input{width:auto}
-.result{margin-top:25px;background:#eaf6ff;padding:20px;border-radius:16px;font-size:18px}
-.price{font-size:36px;font-weight:bold;color:#0077cc}
-button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:14px;background:#0077cc;color:white;font-size:18px;font-weight:bold}
-.small{font-size:13px;color:#666}
+:root{--bg:#f3f7fb;--card:#fff;--text:#122033;--muted:#667085;--blue:#0878c9;--blue-dark:#075c99;--line:#d9e3ef;--soft:#eaf6ff;--shadow:0 16px 40px rgba(18,32,51,.12)}
+*{box-sizing:border-box}
+body{margin:0;padding:22px;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#eef6ff 0%,var(--bg) 100%);color:var(--text)}
+.calculator{max-width:860px;margin:0 auto;background:var(--card);border-radius:26px;box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(8,120,201,.10)}
+.header{padding:28px;background:linear-gradient(135deg,#075c99,#0894e8);color:#fff}
+.header h1{margin:0 0 8px;font-size:30px;line-height:1.15}
+.header p{margin:0;opacity:.92;font-size:15px}
+.content{padding:28px;display:grid;grid-template-columns:1.05fr .95fr;gap:24px}
+.section{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px}
+.section-title{margin:0 0 14px;font-size:18px;font-weight:800}
+label{display:block;font-weight:700;margin:14px 0 7px;font-size:14px}
+input,select{width:100%;padding:13px 14px;border:1px solid #cfd8e3;border-radius:13px;font-size:16px;color:var(--text);background:#fff;outline:none}
+input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(8,120,201,.12)}
+.range-row{display:grid;grid-template-columns:1fr 130px;gap:14px;align-items:center}
+input[type=range]{padding:0;accent-color:var(--blue)}
+.checks{display:grid;gap:10px}
+.check{display:flex;align-items:flex-start;gap:11px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}
+.check input{width:auto;margin-top:3px;transform:scale(1.15)}
+.check span{font-size:15px;line-height:1.35}
+.hint{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.4}
+.oil-box{margin-top:12px;padding:14px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa}
 .hidden{display:none}
+.summary{position:sticky;top:18px;background:var(--soft);border:1px solid #cdeeff;border-radius:22px;padding:22px}
+.summary h2{margin:0 0 15px;font-size:21px}
+.line{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid rgba(8,120,201,.12);font-size:15px}
+.line strong{text-align:right;white-space:nowrap}
+.total{margin-top:18px;padding:18px;border-radius:18px;background:#fff;border:1px solid #bde7ff}
+.total-label{color:var(--muted);font-size:14px;margin-bottom:4px}
+.total-price{font-size:42px;font-weight:900;color:var(--blue);line-height:1}
+.button{margin-top:16px;width:100%;border:0;background:var(--blue);color:#fff;padding:15px 18px;border-radius:15px;font-size:17px;font-weight:800;cursor:pointer}
+.button:hover{background:var(--blue-dark)}
+.note{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.45}
+.badge{display:inline-block;margin-top:10px;padding:7px 10px;border-radius:999px;background:#e9f9ef;color:#116b38;font-weight:800;font-size:13px}
+@media(max-width:780px){body{padding:12px}.content{grid-template-columns:1fr;padding:18px;gap:12px}.header{padding:22px}.header h1{font-size:25px}.summary{position:static}.range-row{grid-template-columns:1fr}.total-price{font-size:36px}}
 </style>
 </head>
 <body>
-
-<div class="box">
-<h1>🧼 Kalkulator mycia kostki</h1>
-<p>Sprawdź orientacyjną cenę usługi. Końcowa wycena zależy od stanu nawierzchni.</p>
-
-<label>Powierzchnia w m²</label>
-<div class="row">
+<div class="calculator">
+<div class="header">
+<h1>🧼 Kalkulator wyceny mycia kostki</h1>
+<p>Sprawdź orientacyjny koszt usługi. Dokładną wycenę ustalamy po obejrzeniu zdjęć lub miejsca realizacji.</p>
+</div>
+<div class="content">
+<div>
+<div class="section">
+<div class="section-title">1. Powierzchnia</div>
+<label for="areaRange">Powierzchnia w m²</label>
+<div class="range-row">
 <input type="range" id="areaRange" min="1" max="2000" value="200" oninput="syncRange()">
 <input type="number" id="area" min="1" max="2000" value="200" oninput="syncInput()">
 </div>
-
-<label>Rodzaj nawierzchni</label>
+<div class="hint">Zakres kalkulatora: od 1 do 2000 m².</div>
+<div class="badge" id="discountInfo">Cena bazowa liczona progresywnie</div>
+</div>
+<div class="section">
+<div class="section-title">2. Rodzaj nawierzchni</div>
+<label for="type">Wybierz nawierzchnię</label>
 <select id="type" onchange="calc()">
 <option value="0">Kostka brukowa</option>
 <option value="1.5">Kostka granitowa +1,50 zł/m²</option>
 <option value="1">Płyty / inne powierzchnie +1 zł/m²</option>
 <option value="2">Kostka + palisady +2 zł/m²</option>
 </select>
-
-<label>Stopień zabrudzenia</label>
+</div>
+<div class="section">
+<div class="section-title">3. Stopień zabrudzenia</div>
+<label for="dirty">Wybierz stopień zabrudzenia</label>
 <select id="dirty" onchange="calc()">
 <option value="0">Lekkie</option>
 <option value="1">Średnie +1 zł/m²</option>
 <option value="2">Mocne +2 zł/m²</option>
 </select>
-
-<label>Usługi dodatkowe</label>
-
-<div class="check">
-<input type="checkbox" id="chem" onchange="calc()">
-<span>Chemiczne usuwanie chwastów +2 zł/m²</span>
 </div>
-
-<div class="check">
-<input type="checkbox" id="impregnation" onchange="calc()">
-<span>Impregnacja +10 zł/m²</span>
+<div class="section">
+<div class="section-title">4. Usługi dodatkowe</div>
+<div class="checks">
+<label class="check"><input type="checkbox" id="chem" onchange="calc()"><span>Chemiczne usuwanie chwastów <strong>+2 zł/m²</strong></span></label>
+<label class="check"><input type="checkbox" id="impregnation" onchange="calc()"><span>Impregnacja <strong>+10 zł/m²</strong></span></label>
+<label class="check"><input type="checkbox" id="sand" onchange="calc()"><span>Uzupełnianie fug piaskiem kwarcowym <strong>+7 zł/m²</strong></span></label>
+<label class="check"><input type="checkbox" id="oilCheck" onchange="toggleOil()"><span>Usuwanie plam oleju <strong>400 zł/m²</strong><br><small>1 plama = orientacyjnie 1 m²</small></span></label>
 </div>
-
-<div class="check">
-<input type="checkbox" id="sand" onchange="calc()">
-<span>Uzupełnianie fug piaskiem kwarcowym +7 zł/m²</span>
-</div>
-
-<div class="check">
-<input type="checkbox" id="oilCheck" onchange="toggleOil()">
-<span>Usuwanie plam oleju +400 zł / szt.</span>
-</div>
-
-<div id="oilBox" class="hidden">
-<label>Liczba plam oleju</label>
+<div id="oilBox" class="oil-box hidden">
+<label for="oilCount">Liczba plam oleju</label>
 <input type="number" id="oilCount" min="0" value="0" oninput="calc()">
+<div class="hint">Przykład: 2 plamy = 2 m² × 400 zł = 800 zł.</div>
 </div>
-
-<div class="result">
-<div>Cena bazowa: <b><span id="base">0</span> zł/m²</b></div>
-<div>Cena końcowa za m²: <b><span id="rate">0</span> zł/m²</b></div>
-<div>Powierzchnia: <b><span id="meters">0</span> m²</b></div>
-<div>Dodatkowy koszt plam oleju: <b><span id="oilCost">0</span> zł</b></div>
-<br>
-<div>Orientacyjna cena:</div>
-<div class="price"><span id="total">0</span> zł</div>
-<p class="small">To wycena orientacyjna. Dokładną cenę ustalam po obejrzeniu zdjęć lub miejsca realizacji.</p>
 </div>
-
-<button onclick="contact()">Poproś o wycenę</button>
 </div>
-
+<div>
+<div class="summary">
+<h2>Podsumowanie</h2>
+<div class="line"><span>Powierzchnia</span><strong><span id="meters">0</span> m²</strong></div>
+<div class="line"><span>Koszt bazowy</span><strong><span id="baseCost">0</span> zł</strong></div>
+<div class="line"><span>Średnia cena bazowa</span><strong><span id="avgBase">0</span> zł/m²</strong></div>
+<div class="line"><span>Dopłaty za m²</span><strong><span id="additionsPerM2">0</span> zł/m²</strong></div>
+<div class="line"><span>Koszt dopłat</span><strong><span id="additionsCost">0</span> zł</strong></div>
+<div class="line"><span>Plamy oleju</span><strong><span id="oilCost">0</span> zł</strong></div>
+<div class="total"><div class="total-label">Orientacyjna cena</div><div class="total-price"><span id="total">0</span> zł</div></div>
+<button class="button" onclick="contact()">Poproś o wycenę</button>
+<div class="note">Cena jest orientacyjna. Ostateczna wycena zależy od faktycznego stanu nawierzchni, dostępu do wody, stopnia zabrudzenia oraz zakresu prac.</div>
+</div>
+</div>
+</div>
+</div>
 <script>
-function baseRate(area){
-  if(area >= 800) return 7;
-  if(area >= 400) return 8;
-  return 9;
+function progressiveBasePrice(area){
+area=Math.max(1,Math.min(2000,Number(area)||1));
+if(area<=400){return area*8}
+if(area<=800){return 400*8+(area-400)*7}
+return 400*8+400*7+(area-800)*7
 }
-
-function syncRange(){
-  document.getElementById("area").value = document.getElementById("areaRange").value;
-  calc();
-}
-
+function syncRange(){document.getElementById("area").value=document.getElementById("areaRange").value;calc()}
 function syncInput(){
-  let area = Number(document.getElementById("area").value) || 1;
-  if(area < 1) area = 1;
-  if(area > 2000) area = 2000;
-
-  document.getElementById("area").value = area;
-  document.getElementById("areaRange").value = area;
-  calc();
+let area=Number(document.getElementById("area").value)||1;
+if(area<1)area=1;if(area>2000)area=2000;
+document.getElementById("area").value=area;
+document.getElementById("areaRange").value=area;
+calc()
 }
-
 function toggleOil(){
-  const checked = document.getElementById("oilCheck").checked;
-  document.getElementById("oilBox").classList.toggle("hidden", !checked);
-  if(!checked) document.getElementById("oilCount").value = 0;
-  calc();
+const checked=document.getElementById("oilCheck").checked;
+const oilBox=document.getElementById("oilBox");
+const oilCount=document.getElementById("oilCount");
+oilBox.classList.toggle("hidden",!checked);
+if(!checked){oilCount.value=0}else if(Number(oilCount.value)<1){oilCount.value=1}
+calc()
 }
-
 function calc(){
-  const area = Number(document.getElementById("area").value) || 0;
-  const type = Number(document.getElementById("type").value);
-  const dirty = Number(document.getElementById("dirty").value);
-
-  const chem = document.getElementById("chem").checked ? 2 : 0;
-  const impregnation = document.getElementById("impregnation").checked ? 10 : 0;
-  const sand = document.getElementById("sand").checked ? 7 : 0;
-
-  const oilChecked = document.getElementById("oilCheck").checked;
-  const oilCount = oilChecked ? Number(document.getElementById("oilCount").value) || 0 : 0;
-  const oilCost = oilCount * 400;
-
-  const base = baseRate(area);
-  const rate = base + type + dirty + chem + impregnation + sand;
-
-  let total = area * rate + oilCost;
-
-  if(total > 0 && total < 400) total = 400;
-
-  document.getElementById("base").innerText = base.toFixed(2);
-  document.getElementById("rate").innerText = rate.toFixed(2);
-  document.getElementById("meters").innerText = area;
-  document.getElementById("oilCost").innerText = oilCost;
-  document.getElementById("total").innerText = Math.round(total);
+const area=Number(document.getElementById("area").value)||1;
+const type=Number(document.getElementById("type").value)||0;
+const dirty=Number(document.getElementById("dirty").value)||0;
+const chem=document.getElementById("chem").checked?2:0;
+const impregnation=document.getElementById("impregnation").checked?10:0;
+const sand=document.getElementById("sand").checked?7:0;
+const additionsPerM2=type+dirty+chem+impregnation+sand;
+const additionsCost=area*additionsPerM2;
+const oilChecked=document.getElementById("oilCheck").checked;
+const oilCount=oilChecked?(Number(document.getElementById("oilCount").value)||0):0;
+const oilCost=oilCount*400;
+const baseCost=progressiveBasePrice(area);
+let total=baseCost+additionsCost+oilCost;
+if(total>0&&total<400){total=400}
+const avgBase=baseCost/area;
+document.getElementById("meters").innerText=area;
+document.getElementById("baseCost").innerText=Math.round(baseCost);
+document.getElementById("avgBase").innerText=avgBase.toFixed(2);
+document.getElementById("additionsPerM2").innerText=additionsPerM2.toFixed(2);
+document.getElementById("additionsCost").innerText=Math.round(additionsCost);
+document.getElementById("oilCost").innerText=Math.round(oilCost);
+document.getElementById("total").innerText=Math.round(total);
+const discountInfo=document.getElementById("discountInfo");
+if(area<=400){discountInfo.innerText="Do 400 m²: 8 zł/m²"}
+else if(area<=800){discountInfo.innerText="Powyżej 400 m²: nadwyżka liczona po 7 zł/m²"}
+else{discountInfo.innerText="Powyżej 800 m²: dalsza powierzchnia liczona po 7 zł/m²"}
 }
-
-function contact(){
-  window.location.href = "tel:694866411";
-}
-
-calc();
+function contact(){window.location.href="tel:694866411"}
+calc()
 </script>
-
 </body>
 </html>
