@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kalkulator mycia kostki</title>
 <style>
 body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:20px}
 .box{max-width:650px;margin:auto;background:white;padding:28px;border-radius:22px;box-shadow:0 10px 30px #0002}
 h1{margin-top:0;color:#123}
 label{font-weight:bold;margin-top:15px;display:block}
-input,select{width:100%;padding:14px;margin-top:6px;border-radius:12px;border:1px solid #ccc;font-size:16px}
+input,select{width:100%;padding:14px;margin-top:6px;border-radius:12px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
+input[type=range]{padding:0}
 .result{margin-top:25px;background:#eaf6ff;padding:20px;border-radius:16px;font-size:18px}
 .price{font-size:34px;font-weight:bold;color:#0077cc}
 button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:14px;background:#0077cc;color:white;font-size:18px;font-weight:bold}
 .small{font-size:13px;color:#666}
+.row{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center}
 </style>
 </head>
 <body>
@@ -23,13 +25,17 @@ button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:14px;backg
 <p>Sprawdź orientacyjną cenę usługi. Końcowa wycena zależy od stanu nawierzchni.</p>
 
 <label>Powierzchnia w m²</label>
-<input type="number" id="area" value="200" min="1" oninput="calc()">
+<div class="row">
+<input type="range" id="areaRange" min="1" max="2000" value="200" oninput="syncRange()">
+<input type="number" id="area" min="1" max="2000" value="200" oninput="syncInput()">
+</div>
 
 <label>Rodzaj nawierzchni</label>
 <select id="type" onchange="calc()">
 <option value="0">Kostka brukowa</option>
 <option value="1.5">Kostka granitowa +1,50 zł/m²</option>
 <option value="1">Płyty / inne powierzchnie +1 zł/m²</option>
+<option value="2">Kostka + palisady +2 zł/m²</option>
 </select>
 
 <label>Stopień zabrudzenia</label>
@@ -37,18 +43,24 @@ button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:14px;backg
 <option value="0">Lekkie</option>
 <option value="1">Średnie +1 zł/m²</option>
 <option value="2">Mocne +2 zł/m²</option>
+<option value="400">Plamy oleju +400 zł/m²</option>
 </select>
 
 <label>Dodatkowe usługi</label>
 <select id="extra" onchange="calc()">
 <option value="0">Bez dodatków</option>
 <option value="1">Usuwanie chwastów +1 zł/m²</option>
-<option value="8">Impregnacja +8 zł/m²</option>
-<option value="9">Chwasty + impregnacja +9 zł/m²</option>
+<option value="2">Chemiczne usuwanie chwastów +2 zł/m²</option>
+<option value="10">Impregnacja +10 zł/m²</option>
+<option value="7">Uzupełnianie fug piaskiem kwarcowym +7 zł/m²</option>
+<option value="12">Chemiczne usuwanie chwastów + impregnacja +12 zł/m²</option>
+<option value="17">Impregnacja + piasek kwarcowy +17 zł/m²</option>
+<option value="19">Chemiczne usuwanie chwastów + impregnacja + piasek kwarcowy +19 zł/m²</option>
 </select>
 
 <div class="result">
-<div>Stawka: <b><span id="rate">0</span> zł/m²</b></div>
+<div>Stawka bazowa: <b><span id="base">0</span> zł/m²</b></div>
+<div>Stawka końcowa: <b><span id="rate">0</span> zł/m²</b></div>
 <div>Powierzchnia: <b><span id="meters">0</span> m²</b></div>
 <br>
 <div>Orientacyjna cena:</div>
@@ -68,27 +80,40 @@ function baseRate(area){
   return 15;
 }
 
+function syncRange(){
+  document.getElementById("area").value = document.getElementById("areaRange").value;
+  calc();
+}
+
+function syncInput(){
+  let area = Number(document.getElementById("area").value) || 1;
+  if(area < 1) area = 1;
+  if(area > 2000) area = 2000;
+  document.getElementById("area").value = area;
+  document.getElementById("areaRange").value = area;
+  calc();
+}
+
 function calc(){
   const area = Number(document.getElementById("area").value) || 0;
   const type = Number(document.getElementById("type").value);
   const dirty = Number(document.getElementById("dirty").value);
   const extra = Number(document.getElementById("extra").value);
 
-  let rate = baseRate(area) + type + dirty + extra;
+  const base = baseRate(area);
+  const rate = base + type + dirty + extra;
   let total = area * rate;
 
   if(total > 0 && total < 400) total = 400;
 
+  document.getElementById("base").innerText = base.toFixed(2);
   document.getElementById("rate").innerText = rate.toFixed(2);
   document.getElementById("meters").innerText = area;
   document.getElementById("total").innerText = Math.round(total);
 }
 
 function contact(){
-  const area = document.getElementById("area").value;
-  const total = document.getElementById("total").innerText;
-  const msg = `Dzień dobry, interesuje mnie mycie kostki. Powierzchnia: ${area} m². Kalkulator pokazał około ${total} zł.`;
-  window.location.href = `tel:694866411`;
+  window.location.href = "tel:694866411";
 }
 
 calc();
