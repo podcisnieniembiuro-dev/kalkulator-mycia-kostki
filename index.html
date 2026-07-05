@@ -6,22 +6,25 @@
 <title>Kalkulator mycia kostki</title>
 <style>
 body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:20px}
-.box{max-width:650px;margin:auto;background:white;padding:28px;border-radius:22px;box-shadow:0 10px 30px #0002}
+.box{max-width:720px;margin:auto;background:white;padding:28px;border-radius:22px;box-shadow:0 10px 30px #0002}
 h1{margin-top:0;color:#123}
-label{font-weight:bold;margin-top:15px;display:block}
+label{font-weight:bold;margin-top:16px;display:block}
 input,select{width:100%;padding:14px;margin-top:6px;border-radius:12px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
 input[type=range]{padding:0}
+.row{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center}
+.check{display:flex;gap:10px;align-items:center;margin-top:12px}
+.check input{width:auto}
 .result{margin-top:25px;background:#eaf6ff;padding:20px;border-radius:16px;font-size:18px}
-.price{font-size:34px;font-weight:bold;color:#0077cc}
+.price{font-size:36px;font-weight:bold;color:#0077cc}
 button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:14px;background:#0077cc;color:white;font-size:18px;font-weight:bold}
 .small{font-size:13px;color:#666}
-.row{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center}
+.hidden{display:none}
 </style>
 </head>
 <body>
 
 <div class="box">
-<h1>🧼 Kalkulator mycia kostki brukowej</h1>
+<h1>🧼 Kalkulator mycia kostki</h1>
 <p>Sprawdź orientacyjną cenę usługi. Końcowa wycena zależy od stanu nawierzchni.</p>
 
 <label>Powierzchnia w m²</label>
@@ -43,25 +46,40 @@ button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:14px;backg
 <option value="0">Lekkie</option>
 <option value="1">Średnie +1 zł/m²</option>
 <option value="2">Mocne +2 zł/m²</option>
-<option value="400">Plamy oleju +400 zł/m²</option>
 </select>
 
-<label>Dodatkowe usługi</label>
-<select id="extra" onchange="calc()">
-<option value="0">Bez dodatków</option>
-<option value="1">Usuwanie chwastów +1 zł/m²</option>
-<option value="2">Chemiczne usuwanie chwastów +2 zł/m²</option>
-<option value="10">Impregnacja +10 zł/m²</option>
-<option value="7">Uzupełnianie fug piaskiem kwarcowym +7 zł/m²</option>
-<option value="12">Chemiczne usuwanie chwastów + impregnacja +12 zł/m²</option>
-<option value="17">Impregnacja + piasek kwarcowy +17 zł/m²</option>
-<option value="19">Chemiczne usuwanie chwastów + impregnacja + piasek kwarcowy +19 zł/m²</option>
-</select>
+<label>Usługi dodatkowe</label>
+
+<div class="check">
+<input type="checkbox" id="chem" onchange="calc()">
+<span>Chemiczne usuwanie chwastów +2 zł/m²</span>
+</div>
+
+<div class="check">
+<input type="checkbox" id="impregnation" onchange="calc()">
+<span>Impregnacja +10 zł/m²</span>
+</div>
+
+<div class="check">
+<input type="checkbox" id="sand" onchange="calc()">
+<span>Uzupełnianie fug piaskiem kwarcowym +7 zł/m²</span>
+</div>
+
+<div class="check">
+<input type="checkbox" id="oilCheck" onchange="toggleOil()">
+<span>Usuwanie plam oleju +400 zł / szt.</span>
+</div>
+
+<div id="oilBox" class="hidden">
+<label>Liczba plam oleju</label>
+<input type="number" id="oilCount" min="0" value="0" oninput="calc()">
+</div>
 
 <div class="result">
-<div>Stawka bazowa: <b><span id="base">0</span> zł/m²</b></div>
-<div>Stawka końcowa: <b><span id="rate">0</span> zł/m²</b></div>
+<div>Cena bazowa: <b><span id="base">0</span> zł/m²</b></div>
+<div>Cena końcowa za m²: <b><span id="rate">0</span> zł/m²</b></div>
 <div>Powierzchnia: <b><span id="meters">0</span> m²</b></div>
+<div>Dodatkowy koszt plam oleju: <b><span id="oilCost">0</span> zł</b></div>
 <br>
 <div>Orientacyjna cena:</div>
 <div class="price"><span id="total">0</span> zł</div>
@@ -73,11 +91,9 @@ button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:14px;backg
 
 <script>
 function baseRate(area){
-  if(area >= 800) return 8;
-  if(area >= 400) return 9;
-  if(area >= 200) return 10;
-  if(area >= 100) return 12;
-  return 15;
+  if(area >= 800) return 7;
+  if(area >= 400) return 8;
+  return 9;
 }
 
 function syncRange(){
@@ -89,8 +105,16 @@ function syncInput(){
   let area = Number(document.getElementById("area").value) || 1;
   if(area < 1) area = 1;
   if(area > 2000) area = 2000;
+
   document.getElementById("area").value = area;
   document.getElementById("areaRange").value = area;
+  calc();
+}
+
+function toggleOil(){
+  const checked = document.getElementById("oilCheck").checked;
+  document.getElementById("oilBox").classList.toggle("hidden", !checked);
+  if(!checked) document.getElementById("oilCount").value = 0;
   calc();
 }
 
@@ -98,17 +122,26 @@ function calc(){
   const area = Number(document.getElementById("area").value) || 0;
   const type = Number(document.getElementById("type").value);
   const dirty = Number(document.getElementById("dirty").value);
-  const extra = Number(document.getElementById("extra").value);
+
+  const chem = document.getElementById("chem").checked ? 2 : 0;
+  const impregnation = document.getElementById("impregnation").checked ? 10 : 0;
+  const sand = document.getElementById("sand").checked ? 7 : 0;
+
+  const oilChecked = document.getElementById("oilCheck").checked;
+  const oilCount = oilChecked ? Number(document.getElementById("oilCount").value) || 0 : 0;
+  const oilCost = oilCount * 400;
 
   const base = baseRate(area);
-  const rate = base + type + dirty + extra;
-  let total = area * rate;
+  const rate = base + type + dirty + chem + impregnation + sand;
+
+  let total = area * rate + oilCost;
 
   if(total > 0 && total < 400) total = 400;
 
   document.getElementById("base").innerText = base.toFixed(2);
   document.getElementById("rate").innerText = rate.toFixed(2);
   document.getElementById("meters").innerText = area;
+  document.getElementById("oilCost").innerText = oilCost;
   document.getElementById("total").innerText = Math.round(total);
 }
 
