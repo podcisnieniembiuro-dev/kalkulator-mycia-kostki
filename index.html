@@ -60,7 +60,7 @@ input[type=range]{padding:0;accent-color:var(--blue)}
 <input type="number" id="area" min="1" value="200" oninput="syncInput()">
 </div>
 <div class="hint">Powyżej 2000 m² kalkulator pokazuje wycenę indywidualną.</div>
-<div class="badge" id="discountInfo">Cena bazowa liczona progresywnie</div>
+<div class="badge" id="discountInfo">Cena bazowa: 8 zł/m²</div>
 </div>
 
 <div class="section">
@@ -104,8 +104,8 @@ input[type=range]{padding:0;accent-color:var(--blue)}
 <div class="summary">
 <h2>Podsumowanie</h2>
 <div class="line"><span>Powierzchnia</span><strong><span id="meters">0</span> m²</strong></div>
+<div class="line"><span>Cena bazowa za m²</span><strong><span id="baseRate">0</span> zł/m²</strong></div>
 <div class="line"><span>Koszt bazowy</span><strong><span id="baseCost">0</span> zł</strong></div>
-<div class="line"><span>Średnia cena bazowa</span><strong><span id="avgBase">0</span> zł/m²</strong></div>
 <div class="line"><span>Dopłaty za m²</span><strong><span id="additionsPerM2">0</span> zł/m²</strong></div>
 <div class="line"><span>Koszt dopłat</span><strong><span id="additionsCost">0</span> zł</strong></div>
 <div class="line"><span>Plamy oleju</span><strong><span id="oilCost">0</span> zł</strong></div>
@@ -123,18 +123,22 @@ input[type=range]{padding:0;accent-color:var(--blue)}
 </div>
 
 <script>
-function progressiveBasePrice(area){
+function baseRate(area){
   area = Number(area) || 0;
 
   if(area <= 400){
-    return area * 8;
+    return 8;
   }
 
   if(area <= 800){
-    return (400 * 8) + ((area - 400) * 7);
+    return 8 - ((area - 400) * 0.0025);
   }
 
-  return (400 * 8) + (400 * 7) + ((area - 800) * 7);
+  if(area <= 1200){
+    return 7 - ((area - 800) * 0.0025);
+  }
+
+  return 6;
 }
 
 function syncRange(){
@@ -184,8 +188,8 @@ function calc(){
   document.getElementById("meters").innerText = area;
 
   if(area > 2000){
+    document.getElementById("baseRate").innerText = "-";
     document.getElementById("baseCost").innerText = "-";
-    document.getElementById("avgBase").innerText = "-";
     document.getElementById("additionsPerM2").innerText = "-";
     document.getElementById("additionsCost").innerText = "-";
     document.getElementById("oilCost").innerText = "-";
@@ -193,6 +197,8 @@ function calc(){
     document.getElementById("discountInfo").innerText = "Powyżej 2000 m²: indywidualna wycena";
     return;
   }
+
+  const rateBase = baseRate(area);
 
   const type = Number(document.getElementById("type").value) || 0;
   const dirty = Number(document.getElementById("dirty").value) || 0;
@@ -207,17 +213,15 @@ function calc(){
   const oilCount = oilChecked ? (Number(document.getElementById("oilCount").value) || 0) : 0;
   const oilCost = oilCount * 400;
 
-  const baseCost = progressiveBasePrice(area);
+  const baseCost = area * rateBase;
   let total = baseCost + additionsCost + oilCost;
 
   if(total > 0 && total < 400){
     total = 400;
   }
 
-  const avgBase = area > 0 ? baseCost / area : 0;
-
+  document.getElementById("baseRate").innerText = rateBase.toFixed(2);
   document.getElementById("baseCost").innerText = Math.round(baseCost);
-  document.getElementById("avgBase").innerText = avgBase.toFixed(2);
   document.getElementById("additionsPerM2").innerText = additionsPerM2.toFixed(2);
   document.getElementById("additionsCost").innerText = Math.round(additionsCost);
   document.getElementById("oilCost").innerText = Math.round(oilCost);
@@ -227,8 +231,12 @@ function calc(){
 
   if(area <= 400){
     discountInfo.innerText = "Do 400 m²: 8 zł/m²";
+  }else if(area <= 800){
+    discountInfo.innerText = "400–800 m²: cena płynnie spada do 7 zł/m²";
+  }else if(area <= 1200){
+    discountInfo.innerText = "800–1200 m²: cena płynnie spada do 6 zł/m²";
   }else{
-    discountInfo.innerText = "Powyżej 400 m²: nadwyżka liczona po 7 zł/m²";
+    discountInfo.innerText = "Powyżej 1200 m²: 6 zł/m²";
   }
 }
 
